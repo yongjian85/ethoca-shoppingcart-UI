@@ -12,9 +12,10 @@ class LineItem extends Component {
     }
 
     render() {
-        const{ lineItem } = this.props;
+        const{ lineItem, removeLineItemParentCallBack } = this.props;
         return (
             <Row>
+            <Col><Button onClick={() => removeLineItemParentCallBack(lineItem.productId)} variant="danger">x</Button></Col>
             <Col xs={6}>{lineItem.productName}</Col>
             <Col><Button variant="outline-danger">-</Button></Col>
             <Col> <FormControl type="text"
