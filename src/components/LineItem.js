@@ -8,21 +8,41 @@ class LineItem extends Component {
 
     constructor(props) {
         super(props);
+    }
+
+    updateLineItemQuantity (quantity, productId, updateLineItemQuantityDirectlyParentCallBack) {
+
+        quantity = parseInt(quantity);
+
+        //Checking if quantity is a valid integer between 1 and 100 inclusive
+        updateLineItemQuantityDirectlyParentCallBack ((!Number.isInteger(quantity)
+        || quantity > process.env.REACT_APP_MAX_LINEITEM_QUANTITY 
+        || quantity < 1),
+        quantity, productId);
 
     }
 
     render() {
-        const{ lineItem, removeLineItemParentCallBack } = this.props;
+        const{ isInvalid, lineItem, removeLineItemParentCallBack, subtractOneQuantityParentCallBack, addOneQuantityParentCallBack, updateLineItemQuantityDirectlyParentCallBack } = this.props;
+       
         return (
             <Row>
             <Col><Button onClick={() => removeLineItemParentCallBack(lineItem.productId)} variant="danger">x</Button></Col>
             <Col xs={6}>{lineItem.productName}</Col>
-            <Col><Button variant="outline-danger">-</Button></Col>
+            <Col>
+                <Button 
+                    onClick={() => subtractOneQuantityParentCallBack (lineItem.productId)}
+                    variant="outline-danger">-</Button>
+            </Col>
             <Col> <FormControl type="text"
-                        placeholder="Search"
+                        placeholder="?"
                         value={lineItem.quantity}
+                        isInvalid={isInvalid !== undefined && isInvalid}
+                        onChange={(event) => {this.updateLineItemQuantity(event.target.value, lineItem.productId, updateLineItemQuantityDirectlyParentCallBack)}}
                         className="mr-sm-2" /></Col>
-            <Col><Button variant="outline-success">+</Button></Col>
+            <Col><Button 
+                    onClick={() => addOneQuantityParentCallBack (lineItem.productId)}
+                    variant="outline-success">+</Button></Col>
           </Row>
            
         )
