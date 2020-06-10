@@ -129,6 +129,33 @@ class ShoppingCartMain extends Component {
     this.setState({ ...this.state, currentPurchaseOrder: newPurchaseOrder });
   }
 
+  addProductIdToCart(productId, productName, currentPurchaseOrder) {
+
+    let isProductIdFound = false;
+    /*if we find the productId already in the shopping cart, we will increase it by 1
+    else add it to the cart
+    */
+    for (var index = 0; index <currentPurchaseOrder.lineItems.length; index++) {
+      if(currentPurchaseOrder.lineItems[index].productId === productId) {
+        currentPurchaseOrder.lineItems[index].quantity++;
+        isProductIdFound = true;
+        break;
+      }
+    }
+
+    if (!isProductIdFound) {
+      let newLineItem = {
+        productId: productId,
+        productName: productName,
+        quantity: 1
+      }
+      currentPurchaseOrder.lineItems.push(newLineItem);
+    }
+
+    this.updateCurrentPurchaseOrder(currentPurchaseOrder);
+
+  }
+
   render() {
     const { products } = this.state;
     return (
@@ -142,7 +169,8 @@ class ShoppingCartMain extends Component {
         isResponse404={this.state.isResponse404}  
         isResponse500s={this.state.isResponse500s}></ErrorBanner>: ""}
 
-        <Products products={products}></Products>
+        <Products products={products}
+        addProductIdToCartParentCallback={(productId, productName) => {this.addProductIdToCart(productId, productName, this.state.currentPurchaseOrder)}}></Products>
 
         <CurrentCart currentPurchaseOrder={this.state.currentPurchaseOrder}
           updateParentCurrentPurchaseOrderCallBack={(newPurchaseOrder) => { this.updateCurrentPurchaseOrder(newPurchaseOrder) }}></CurrentCart>
