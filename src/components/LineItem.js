@@ -29,10 +29,10 @@ class LineItem extends Component {
             <Row>
             <Col><Button onClick={() => removeLineItemParentCallBack(lineItem.productId)} variant="danger">x</Button></Col>
             <Col xs={6}>{lineItem.productName}</Col>
-            <Col>
+            <Col>{lineItem.quantity > 1 ? 
                 <Button 
                     onClick={() => subtractOneQuantityParentCallBack (lineItem.productId)}
-                    variant="outline-danger">-</Button>
+                    variant="outline-danger">-</Button> : "" }
             </Col>
             <Col> <FormControl type="text"
                         placeholder="?"
@@ -40,9 +40,10 @@ class LineItem extends Component {
                         isInvalid={isInvalid !== undefined && isInvalid}
                         onChange={(event) => {this.updateLineItemQuantity(event.target.value, lineItem.productId, updateLineItemQuantityDirectlyParentCallBack)}}
                         className="mr-sm-2" /></Col>
-            <Col><Button 
+            <Col>{lineItem.quantity < 100 ?
+                <Button 
                     onClick={() => addOneQuantityParentCallBack (lineItem.productId)}
-                    variant="outline-success">+</Button></Col>
+                    variant="outline-success">+</Button>: ""}</Col>
           </Row>
            
         )

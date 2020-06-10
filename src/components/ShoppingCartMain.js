@@ -6,7 +6,9 @@ import CurrentCart from './CurrentCart';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
-import ErrorBanner from './ErrorBanner';
+import StatusBanner from './StatusBanner';
+import { PURCHASE_ORDER_STATUS_IN_PROGRESS, PURCHASE_ORDER_STATUS_SUBMITTED } from '../constants';
+
 
 class ShoppingCartMain extends Component {
 
@@ -20,7 +22,8 @@ class ShoppingCartMain extends Component {
       isNewPurchaseOrder: true,
       isDataInValid: false,
       isResponse404: false,
-      isResponse500s: false
+      isResponse500s: false,
+      isResponse200: false
     };
 
 
@@ -41,6 +44,9 @@ class ShoppingCartMain extends Component {
   }
 
   retrieveCurrentUserPurchaseOrder(currentUsername) {
+
+    this.setState({...this.state, isDataInValid: false, isResponse404: false, isResponse500s: false, isResponse200: false})
+
     if (currentUsername !== undefined && currentUsername.trim() !== "") {
       axios({
         method: 'GET',
@@ -50,7 +56,7 @@ class ShoppingCartMain extends Component {
       }).then(res => {
 
         if (res.status === 200) { //there was an 'In Progress' purchase Order
-          this.setState({ ...this.state, currentPurchaseOrder: res.data.purchaseOrder, isNewPurchaseOrder: false })
+          this.setState({ ...this.state, currentPurchaseOrder: res.data.purchaseOrder, isNewPurchaseOrder: false, isResponse200: true })
           return
         } else if (res.status === 404) { //there was no 'In Progress' purchase Order
           this.setState({ ...this.state, currentPurchaseOrder: undefined, isNewPurchaseOrder: true })
@@ -65,6 +71,10 @@ class ShoppingCartMain extends Component {
   }
 
   deletePurchaseOrder (purchaseId) {
+
+    this.setState({...this.state, isDataInValid: false, isResponse404: false, isResponse500s: false, isResponse200: false})
+
+
     axios({
       method: 'DELETE',
       url: `${process.env.REACT_APP_API_ENDPOINT}/purchaseOrder/${purchaseId}`,
@@ -73,20 +83,36 @@ class ShoppingCartMain extends Component {
     }).then(res => {
 
       if (res.status === 200) { //there was an 'In Progress' purchase Order
-        this.setState({ ...this.state, currentPurchaseOrder: undefined, isNewPurchaseOrder: true })
+        this.setState({ ...this.state, currentPurchaseOrder: undefined, isNewPurchaseOrder: true, isResponse200: true })
         return
       } else if (res.status === 404) { //there was no 'In Progress' purchase Order
         this.setState({ ...this.state, currentPurchaseOrder: undefined, isNewPurchaseOrder: true })
         return
       } else { //there something with the backend
-        this.setState({ ...this.state, currentPurchaseOrder: undefined, isNewPurchaseOrder: true, isPurchaseOrderDeleteError: true })
+        this.setState({ ...this.state, currentPurchaseOrder: undefined, isNewPurchaseOrder: true, isResponse500s: true })
         return
 
       }
     });
   }
 
+
   savePurchaseOrder (purchaseOrder) {
+
+    purchaseOrder.status = PURCHASE_ORDER_STATUS_IN_PROGRESS;
+    this.updatePurchaseOrder(purchaseOrder);
+
+  }
+
+  submitPurchaseOrder (purchaseOrder) {
+    purchaseOrder.status = PURCHASE_ORDER_STATUS_SUBMITTED;
+    this.updatePurchaseOrder (purchaseOrder);
+  }
+
+  updatePurchaseOrder (purchaseOrder) {
+
+    this.setState({...this.state, isDataInValid: false, isResponse404: false, isResponse500s: false, isResponse200: false})
+
 
     for (var index = 0; index < purchaseOrder.lineItems.length; index++) {
 
@@ -106,13 +132,13 @@ class ShoppingCartMain extends Component {
       }).then(res => {
 
         if (res.status === 200) { //there was an 'In Progress' purchase Order
-          this.setState({ ...this.state, isDataInValid: false, isResponse404: false, isResponse500s: false})
+          this.setState({ ...this.state, isDataInValid: false, isResponse200: true})
           return
         } else if (res.status === 404) { //there was no 'In Progress' purchase Order
-          this.setState({ ...this.state, isDataInValid: true, isResponse404: true, isResponse500s: false })
+          this.setState({ ...this.state, isDataInValid: true, isResponse404: true })
           return
         } else { //there something with the backend
-          this.setState({ ...this.state, isDataInValid: true,  isResponse404: false, isResponse500s: true })
+          this.setState({ ...this.state, isDataInValid: true, isResponse500s: true })
           return
 
         }
@@ -164,10 +190,10 @@ class ShoppingCartMain extends Component {
           updateParentCurrentUserCallback={(newUserName) => { this.updateCurrentUserName(newUserName) }}
           retrieveCurrentUserMostRecentPurchaseOrderCallBack={(currentUsername) => { this.retrieveCurrentUserPurchaseOrder(currentUsername) }}></PageHeader>
 
-        {this.state.isDataInValid || this.state.isResponse404 || this.state.isResponse500s? 
-        <ErrorBanner isDataInValid={this.state.isDataInValid} 
+        {this.state.isDataInValid || this.state.isResponse404 || this.state.isResponse500s || this.state.isResponse200 ?
+        <StatusBanner isDataInValid={this.state.isDataInValid} 
         isResponse404={this.state.isResponse404}  
-        isResponse500s={this.state.isResponse500s}></ErrorBanner>: ""}
+        isResponse500s={this.state.isResponse500s} isResponse200={this.state.isResponse200}></StatusBanner>: ""}
 
         <Products products={products}
         addProductIdToCartParentCallback={(productId, productName) => {this.addProductIdToCart(productId, productName, this.state.currentPurchaseOrder)}}></Products>
@@ -179,10 +205,13 @@ class ShoppingCartMain extends Component {
           <Row>
             <Col><Button onClick={() => {this.savePurchaseOrder(this.state.currentPurchaseOrder)}}
             variant="outline-primary">Save</Button></Col>
+            
             <Col>
               <Button onClick={() => {this.deletePurchaseOrder(this.state.currentPurchaseOrder.purchaseId)}} 
                     variant="outline-danger">Delete</Button></Col>
-            <Col><Button variant="success">Purchase!</Button></Col>
+            
+            <Col><Button onClick={() => {this.submitPurchaseOrder(this.state.currentPurchaseOrder)}} 
+            variant="success">Purchase!</Button></Col>
           </Row> : ""}
           {this.state.currentPurchaseOrder !== undefined && this.state.currentPurchaseOrder.lineItems.length === 0 ?
           <Row>

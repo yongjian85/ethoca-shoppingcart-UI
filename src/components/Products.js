@@ -11,7 +11,7 @@ class Products extends Component {
     }
 
     render() {
-        const{ products, addProductIdToCartParentCallback } = this.props;
+        const{ products, addProductIdToCartParentCallback, maxLineItemQuantity} = this.props;
         return (
           <CardDeck>
            
@@ -27,6 +27,7 @@ class Products extends Component {
           
             </Card.Body>
             <Card.Footer>
+             
               <Button onClick={() => {addProductIdToCartParentCallback(product.productId, product.productName)}}
               variant="primary">Add to Cart</Button>
               </Card.Footer>
