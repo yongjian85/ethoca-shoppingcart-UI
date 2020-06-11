@@ -11,7 +11,7 @@ class Products extends Component {
     }
 
     render() {
-        const{ products, addProductIdToCartParentCallback, maxLineItemQuantity} = this.props;
+        const{ products, addProductIdToCartParentCallback} = this.props;
         return (
           <CardDeck>
            

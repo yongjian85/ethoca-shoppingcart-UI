@@ -28,13 +28,18 @@ class PageHeader extends Component {
                         value={currentUser}
                         onChange={(event) => this.updateParentCurrentUserValue(event.target.value, updateParentCurrentUserCallback)}
                         isInvalid={false}
+                        disabled
                         className="mr-sm-2" />
                          <Form.Control.Feedback type="invalid">
                   "user name is invalid"
                 </Form.Control.Feedback>
                 </InputGroup>
+               
+                    {/* decided not to allow for user switch for the demo as it complicates the UI logic
                     <Button variant="outline-success"
                         onClick={() => retrieveCurrentUserMostRecentPurchaseOrderCallBack(currentUser)}>Retrieve Saved Order</Button>
+        */}
+                     
                 </Form>
 
 

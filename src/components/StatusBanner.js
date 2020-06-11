@@ -8,7 +8,7 @@ class StatusBanner extends Component {
     }
  
     render() {
-        const{ isResponse200, isDataInValid, isResponse404, isResponse500s } = this.props;
+        const{ isResponse200, isDataInValid, isResponse404 } = this.props;
         
         let errorMsg = "";
         if (isDataInValid) {
