@@ -120,7 +120,7 @@ class ShoppingCartMain extends Component {
     });
   }
 
-
+  /*used to either create a new order in progress*/
   savePurchaseOrder(purchaseOrder) {
 
     purchaseOrder.status = PURCHASE_ORDER_STATUS_IN_PROGRESS;
@@ -128,6 +128,7 @@ class ShoppingCartMain extends Component {
 
   }
 
+  /*used to purchase an order */
   submitPurchaseOrder(purchaseOrder) {
     purchaseOrder.status = PURCHASE_ORDER_STATUS_SUBMITTED;
     this.updatePurchaseOrder(purchaseOrder);
@@ -157,6 +158,8 @@ class ShoppingCartMain extends Component {
     }).then(res => {
 
       var purchaseOrder = this.state.currentPurchaseOrder;
+
+      //saving this payload to send to the confirmation window
       var modalDataLineItems = this.state.currentPurchaseOrder.lineItems;
 
       if (res.status === 200) { //there was an 'In Progress' purchase Order
@@ -206,6 +209,7 @@ class ShoppingCartMain extends Component {
     /*if we find the productId already in the shopping cart, we will increase it by 1
     else add it to the cart
     */
+   //TODO: add validation to not be able to increase pass MAX limit set in properties
     for (var index = 0; index < currentPurchaseOrder.lineItems.length; index++) {
       if (currentPurchaseOrder.lineItems[index].productId === productId) {
         currentPurchaseOrder.lineItems[index].quantity++;

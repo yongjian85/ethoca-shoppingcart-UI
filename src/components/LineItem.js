@@ -23,7 +23,7 @@ class LineItem extends Component {
     }
 
     render() {
-        const{ isInvalid, lineItem, removeLineItemParentCallBack, subtractOneQuantityParentCallBack, addOneQuantityParentCallBack, updateLineItemQuantityDirectlyParentCallBack } = this.props;
+        const{ isInvalid, lineItem, removeLineItemParentCallBack, subtractOneQuantityParentCallBack, addOneQuantityParentCallBack, updateLineItemQuantityDirectlyParentCallBack, maxQuantity } = this.props;
        
         return (
             <Row>
@@ -40,7 +40,7 @@ class LineItem extends Component {
                         isInvalid={isInvalid !== undefined && isInvalid}
                         onChange={(event) => {this.updateLineItemQuantity(event.target.value, lineItem.productId, updateLineItemQuantityDirectlyParentCallBack)}}
                         className="mr-sm-2" /></Col>
-            <Col>{lineItem.quantity < 100 ?
+            <Col>{lineItem.quantity < parseInt(maxQuantity) ? //need to read this from property
                 <Button 
                     onClick={() => addOneQuantityParentCallBack (lineItem.productId)}
                     variant="outline-success">+</Button>: ""}</Col>

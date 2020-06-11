@@ -88,7 +88,8 @@ class CurrentCart extends Component {
                             subtractOneQuantityParentCallBack={(productId) => {this.subtractOneQuantityFromLineItem(productId, currentPurchaseOrder, updateParentCurrentPurchaseOrderCallBack)}}
                             addOneQuantityParentCallBack={(productId) => {this.addOneQuantityToLineItem(productId, currentPurchaseOrder, updateParentCurrentPurchaseOrderCallBack)}}
                             updateLineItemQuantityDirectlyParentCallBack={(isInvalid, quantity, productId) => {this.updateLineItemQuantityDirectly(isInvalid, quantity, productId, currentPurchaseOrder, updateParentCurrentPurchaseOrderCallBack)}}
-                            isInvalid={lineItem.isInvalid}>
+                            isInvalid={lineItem.isInvalid}
+                            maxQuantity={process.env.REACT_APP_MAX_LINEITEM_QUANTITY}>
 
                             </LineItem>
 
