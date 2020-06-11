@@ -7,6 +7,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import StatusBanner from './StatusBanner';
+import ConfirmationModal from './ConfirmationModal'
 import { PURCHASE_ORDER_STATUS_IN_PROGRESS, PURCHASE_ORDER_STATUS_SUBMITTED } from '../constants';
 
 
@@ -32,7 +33,9 @@ class ShoppingCartMain extends Component {
       isResponse404: false,
       isResponse500s: false,
       isResponse200: false,
-      isNewPurchaseOrder: true
+      isNewPurchaseOrder: true,
+      isShowConfirmationModal: false,
+      modalDataLineItems: []
     };
 
 
@@ -54,6 +57,10 @@ class ShoppingCartMain extends Component {
     this.retrieveCurrentUserPurchaseOrder(this.state.currentUserName);
 
 
+  }
+
+  hideConfirmationModal() {
+    this.setState({ ...this.state, isShowConfirmationModal: false })
   }
 
   retrieveCurrentUserPurchaseOrder(currentUsername) {
@@ -85,9 +92,6 @@ class ShoppingCartMain extends Component {
 
   deletePurchaseOrder(purchaseId) {
 
-    this.setState({ ...this.state, isDataInValid: false, isResponse404: false, isResponse500s: false, isResponse200: false })
-
-
     axios({
       method: 'DELETE',
       url: `${process.env.REACT_APP_API_ENDPOINT}/purchaseOrder/${purchaseId}`,
@@ -95,8 +99,15 @@ class ShoppingCartMain extends Component {
       validateStatus: () => true
     }).then(res => {
 
+      var newPurchaseOrder = {
+        lineItems: [],
+        purchaseOrderOwner: "yong", //hardcoding the initial purchaseOrder Owner here as we dont have an authentication method
+        status: PURCHASE_ORDER_STATUS_IN_PROGRESS
+
+      };
+
       if (res.status === 200) { //there was an 'In Progress' purchase Order
-        this.setState({ ...this.state, isDataInValid: false, isResponse404: false, isResponse500s: false, isResponse200: true })
+        this.setState({ ...this.state, isNewPurchaseOrder: true, currentPurchaseOrder: newPurchaseOrder, currentPuisDataInValid: false, isResponse404: false, isResponse500s: false, isResponse200: true })
         return
       } else if (res.status === 404) { //this transaction was cancelled via other channels
         this.setState({ ...this.state, currentPurchaseOrder: undefined, isDataInValid: false, isResponse404: true, isResponse500s: false, isResponse200: false })
@@ -146,6 +157,7 @@ class ShoppingCartMain extends Component {
     }).then(res => {
 
       var purchaseOrder = this.state.currentPurchaseOrder;
+      var modalDataLineItems = this.state.currentPurchaseOrder.lineItems;
 
       if (res.status === 200) { //there was an 'In Progress' purchase Order
 
@@ -164,7 +176,7 @@ class ShoppingCartMain extends Component {
 
           };
 
-          this.setState({ ...this.state, isNewPurchaseOrder: true, currentPurchaseOrder: newPurchaseOrder, isDataInValid: false, isResponse404: false, isResponse500s: false, isResponse200: true });
+          this.setState({ ...this.state, modalDataLineItems: modalDataLineItems, isNewPurchaseOrder: true, isShowConfirmationModal: true, currentPurchaseOrder: newPurchaseOrder, isDataInValid: false, isResponse404: false, isResponse500s: false, isResponse200: true });
         }
         return
       } else if (res.status === 404) { //there was no 'In Progress' purchase Order
@@ -219,6 +231,10 @@ class ShoppingCartMain extends Component {
     const { products } = this.state;
     return (
       <div>
+        <ConfirmationModal lineItems={this.state.modalDataLineItems}
+          isShowModal={this.state.isShowConfirmationModal}
+          closeModalParentCallBack={() => this.hideConfirmationModal()}></ConfirmationModal>
+
         <PageHeader currentUser={this.state.currentUserName}
           updateParentCurrentUserCallback={(newUserName) => { this.updateCurrentUserName(newUserName) }}
           retrieveCurrentUserMostRecentPurchaseOrderCallBack={(currentUsername) => { this.retrieveCurrentUserPurchaseOrder(currentUsername) }}></PageHeader>
@@ -246,7 +262,7 @@ class ShoppingCartMain extends Component {
             <Col><Button onClick={() => { this.submitPurchaseOrder(this.state.currentPurchaseOrder) }}
               variant="success">Purchase!</Button></Col>
           </Row> : ""}
-        {this.state.currentPurchaseOrder !== undefined && this.state.currentPurchaseOrder.lineItems.length === 0 ?
+        {this.state.currentPurchaseOrder !== undefined && this.state.currentPurchaseOrder.lineItems.length === 0 && !this.state.isNewPurchaseOrder ?
           <Row>
             <Col>
               <Button onClick={() => { this.deletePurchaseOrder(this.state.currentPurchaseOrder.purchaseId) }}
